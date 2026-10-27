@@ -1,0 +1,15 @@
+{
+  "name": "dev-task-catchup-local",
+  "plugins": [
+    {
+      "name": "task-catchup",
+      "source": "./task-catchup",
+      "version": "0.2.4",
+      "description": "Scheduled-task catch-up patch: missed tasks run right after boot",
+      "displayName": "Task Catchup",
+      "displayName_i18n": { "zh-CN": "定时任务补跑补丁" },
+      "description_i18n": { "zh-CN": "让各家 agent 创建的定时任务错过时间点后开机自动补跑（Windows StartWhenAvailable / systemd Persistent / anacron），含建任务与批量修补脚本" },
+      "category": "productivity"
+    }
+  ]
+}

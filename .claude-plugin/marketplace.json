@@ -1,0 +1,15 @@
+{
+  "name": "task-catchup",
+  "owner": {
+    "name": "willings-79",
+    "url": "https://github.com/willings-79/task-catchup"
+  },
+  "plugins": [
+    {
+      "name": "task-catchup",
+      "source": "./task-catchup",
+      "description": "Scheduled-task catch-up patch: missed tasks run right after boot (StartWhenAvailable / systemd Persistent / anacron)",
+      "version": "0.2.4"
+    }
+  ]
+}
