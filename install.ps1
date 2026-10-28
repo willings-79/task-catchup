@@ -28,10 +28,16 @@ $ruleText = @'
 '@
 
 function Read-TextSmart([string]$Path) {
-  # 按字节判编码：BOM -> UTF-8(BOM)；严格 UTF-8 可解 -> UTF-8(无BOM)；否则按系统 ANSI(GBK)。
+  # 按字节判编码：UTF-8 BOM / UTF-16 LE(BE) BOM / 严格 UTF-8 可解 / 否则按系统 ANSI(GBK)。
   $bytes = [IO.File]::ReadAllBytes($Path)
   if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
     return @{ Text = [System.Text.Encoding]::UTF8.GetString($bytes, 3, $bytes.Length - 3); Enc = (New-Object System.Text.UTF8Encoding($true)) }
+  }
+  if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) {
+    return @{ Text = [System.Text.Encoding]::Unicode.GetString($bytes, 2, $bytes.Length - 2); Enc = [System.Text.Encoding]::Unicode }
+  }
+  if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFE -and $bytes[1] -eq 0xFF) {
+    return @{ Text = [System.Text.Encoding]::BigEndianUnicode.GetString($bytes, 2, $bytes.Length - 2); Enc = [System.Text.Encoding]::BigEndianUnicode }
   }
   $strict = New-Object System.Text.UTF8Encoding($false, $true)
   try {

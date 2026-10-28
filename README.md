@@ -115,9 +115,9 @@ PowerShell 5.1+（Win10/11 自带），脚本在 `task-catchup/skills/task-catch
 powershell -NoProfile -ExecutionPolicy Bypass -File New-CatchupTask.ps1 `
   -Name "日报" -Run "powershell.exe" -Arguments "-File C:\jobs\report.ps1" -Daily "09:00"
 
-# 批量给存量任务开补跑：默认只列出，-Apply 才写
+# 批量给存量任务开补跑：默认只列出，-Apply 才写；第三方更新类任务（名字含 Updater/Update/LogonTask）默认跳过，-IncludeVendors 包含
 powershell -NoProfile -ExecutionPolicy Bypass -File Enable-TaskCatchup.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File Enable-TaskCatchup.ps1 -Apply -Name "Wps*"
+powershell -NoProfile -ExecutionPolicy Bypass -File Enable-TaskCatchup.ps1 -Apply -Name "Wps*" -IncludeVendors
 ```
 
 参数速查：
