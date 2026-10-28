@@ -1,6 +1,6 @@
 {
   "name": "task-catchup",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Scheduled-task catch-up patch: missed tasks run right after boot (Windows StartWhenAvailable, systemd Persistent, anacron)",
   "skills": "./skills",
   "author": {
