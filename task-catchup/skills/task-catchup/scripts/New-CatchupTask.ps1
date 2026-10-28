@@ -35,6 +35,7 @@ if ($windowExplicit -and $MaxDelayHours -gt 0) {
   if ($Hourly -gt 0) { throw '-MaxDelayHours does not support -Hourly (the window anchor would differ from the trigger anchor).' }
   if ($AtLogon -or $AtStartup) { throw '-MaxDelayHours only applies to time-based triggers (-Daily / -Weekly).' }
 }
+if (-not $windowExplicit -and $Weekly) { $MaxDelayHours = 168 }  # 周任务默认窗口一周：24h 会把大多数周错过判为过期
 $useWindow = (($Daily -or $Weekly) -and $MaxDelayHours -gt 0)
 
 $triggers = @()
