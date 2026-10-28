@@ -17,7 +17,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 它会自动：把技能装进本机检测到的 agent 技能目录（ZCode / Claude Code / Codex / 通用 `~/.agents/skills`）、把防丢规则写进各家的全局指令（带标记，`-Undo` 一键卸载），并列出你机器上没开补跑的存量任务（加 `-ApplyExisting` 顺带修好）。装完**新开会话**，对任意 agent 说「帮我建个每天 9 点的定时任务」即可。
 
-**桌面版用户（WorkBuddy / ZCode / DSH 桌面端）更省事的姿势**：直接对桌面版 agent 说「帮我运行解压目录里的 install.ps1」——桌面版 agent 能替你执行全部步骤，不用自己开终端。
+**桌面版用户（WorkBuddy / ZCode / DSH / Codex 桌面端）更省事的姿势**：直接对桌面版 agent 说「帮我运行解压目录里的 install.ps1」——桌面版 agent 能替你执行全部步骤，不用自己开终端。
 
 **ZCode 用户还有第二条路（纯市场，不跑脚本）**：插件市场 → Discover → **+** → 添加 GitHub 仓库 `willings-79/task-catchup` → 安装（ZCode 支持把 GitHub 仓库直接作为市场源）。
 
@@ -73,11 +73,10 @@ powershell -ExecutionPolicy Bypass -File task-catchup\skills\task-catchup\script
 2. **规则粘贴**：把下面 Codex 一节的规则加进 DSH 的全局指令 / 系统提示配置（参考其插件与配置文档）
 3. **直接差遣**：DSH 本身就是命令行工具，让它直接执行脚本最省事（同 WorkBuddy 第 3 条）
 
-### Codex
+### Codex（桌面版 / IDE / CLI）
 
-Codex 已官方支持 Skills，两种方式任选：
-
-- **技能导入**：把 `task-catchup/skills/task-catchup` 放进 Codex 的技能目录
+- **桌面版最省事**：直接对 Codex 说「帮我运行解压目录里的 install.ps1」（它会自动装技能、写规则），或说「把定时任务补跑规则写进你的全局配置」
+- **技能导入**：Codex 已官方支持 Skills——把 `task-catchup/skills/task-catchup` 放进 Codex 的技能目录
 - **规则粘贴**：把下面这段粘进全局指令文件 `~/.codex/AGENTS.md`：
 
 > 创建定时任务规则：Windows 计划任务必须启用"错过补跑"——PowerShell 用 `New-ScheduledTaskSettingsSet -StartWhenAvailable`；`schtasks` 必须走 `/XML` 且包含 `<StartWhenAvailable>true</StartWhenAvailable>`。Linux 用 systemd timer `Persistent=true` 或 anacron，不用裸 cron。调度时间=最早执行时间，错过（关机/休眠）后在下次开机/唤醒时立即补跑一次。
