@@ -4,7 +4,7 @@
     {
       "name": "task-catchup",
       "source": "./task-catchup",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "description": "Scheduled-task catch-up patch: missed tasks run right after boot",
       "displayName": "Task Catchup",
       "displayName_i18n": { "zh-CN": "定时任务补跑补丁" },
