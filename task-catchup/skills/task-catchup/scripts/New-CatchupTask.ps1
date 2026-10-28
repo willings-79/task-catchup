@@ -11,7 +11,7 @@ param(
   [ValidateSet('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')][string[]]$Weekly = @(),
   [ValidatePattern('^\d{1,2}:\d{2}$')][string]$WeeklyAt = '',
   [ValidateRange(1, 168)][int]$Hourly = 0,
-  [ValidateRange(0, 8760)][int]$MaxDelayHours = 0,
+  [ValidateRange(0, 8760)][int]$MaxDelayHours = 24,
   [switch]$AtLogon,
   [switch]$AtStartup,
   [switch]$Wake,
@@ -29,11 +29,13 @@ if ($AtStartup) {
   }
 }
 if ($Weekly -and -not $WeeklyAt) { throw 'Weekly trigger needs -WeeklyAt "HH:mm"' }
-if ($MaxDelayHours -gt 0) {
-  if ($AtLogon -or $AtStartup) { throw '-MaxDelayHours only applies to time-based triggers (-Daily / -Weekly).' }
+# 默认补跑窗口 24 小时（一天）；0 = 不限时长、总是补最近一次
+$windowExplicit = $PSBoundParameters.ContainsKey('MaxDelayHours')
+if ($windowExplicit -and $MaxDelayHours -gt 0) {
   if ($Hourly -gt 0) { throw '-MaxDelayHours does not support -Hourly (the window anchor would differ from the trigger anchor).' }
-  if (-not ($Daily -or $Weekly)) { throw '-MaxDelayHours requires -Daily or -Weekly.' }
+  if ($AtLogon -or $AtStartup) { throw '-MaxDelayHours only applies to time-based triggers (-Daily / -Weekly).' }
 }
+$useWindow = (($Daily -or $Weekly) -and $MaxDelayHours -gt 0)
 
 $triggers = @()
 if ($Daily)   { $triggers += New-ScheduledTaskTrigger -Daily -At $Daily }
@@ -47,7 +49,7 @@ $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances 
 if ($Wake) { $settings.WakeToRun = $true }
 $principal = New-ScheduledTaskPrincipal -UserId $identity -LogonType Interactive -RunLevel Limited
 
-if ($MaxDelayHours -gt 0) {
+if ($useWindow) {
   # 窗口模式：生成守卫脚本（窗口判断 + .last 状态防重复），payload 经 ProcessStartInfo 原样传参，不经 PS 二次解析
   $jobsDir = Join-Path $env:USERPROFILE 'catchup-jobs'
   New-Item -ItemType Directory -Force -Path $jobsDir | Out-Null
@@ -88,7 +90,7 @@ if ('__DAILY__' -ne '') {
 if ($null -eq $occ) { Write-Output 'catchup-guard: no past occurrence matched, skip'; exit 0 }
 if ($occ -le $prev) { Write-Output 'catchup-guard: already ran for this occurrence, skip'; exit 0 }
 $delayH = ($now - $occ).TotalHours
-if ($delayH -gt $MaxDelayHours) {
+if ($MaxDelayHours -gt 0 -and $delayH -gt $MaxDelayHours) {
   Write-Output ('catchup-guard: SKIP, stale by {0:N1}h (window {1}h)' -f $delayH, $MaxDelayHours)
   exit 0
 }
@@ -132,7 +134,7 @@ if ($Description) { $registerParams.Description = $Description }
 try {
   Register-ScheduledTask @registerParams -ErrorAction Stop | Out-Null
 } catch {
-  if ($MaxDelayHours -gt 0 -and (Test-Path $guardPath)) { Remove-Item $guardPath -ErrorAction SilentlyContinue }
+  if ($useWindow -and (Test-Path $guardPath)) { Remove-Item $guardPath -ErrorAction SilentlyContinue }
   throw "Register-ScheduledTask failed for '$Name': $($_.Exception.Message)"
 }
 

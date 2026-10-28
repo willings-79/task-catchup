@@ -6,9 +6,22 @@
 > Windows 用计划任务 `StartWhenAvailable`；Linux 用 systemd timer `Persistent=true` 或 anacron。
 > 补跑为合并语义：错过多天也只补跑一次（补最近一次），不会连跑 N 份。
 
-## 新用户 5 分钟上手
+## 新用户 5 分钟上手（即插即用）
 
-**第 1 步 · 安装**：主推四家——**WorkBuddy（wb）、ZCode、DSH、Codex**——接法见下文各自小节；Claude Code、Cursor 等其他 agent 见「其他 agent」一节
+**推荐路径：下载 → 解压 → 跑一下 install.ps1 → 完事。**
+
+```powershell
+# 在解压出的目录里执行：
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+它会自动：把技能装进本机检测到的 agent 技能目录（ZCode / Claude Code / Codex / 通用 `~/.agents/skills`）、把防丢规则写进各家的全局指令（带标记，`-Undo` 一键卸载），并列出你机器上没开补跑的存量任务（加 `-ApplyExisting` 顺带修好）。装完**新开会话**，对任意 agent 说「帮我建个每天 9 点的定时任务」即可。
+
+**桌面版用户（WorkBuddy / ZCode / DSH 桌面端）更省事的姿势**：直接对桌面版 agent 说「帮我运行解压目录里的 install.ps1」——桌面版 agent 能替你执行全部步骤，不用自己开终端。
+
+**ZCode 用户还有第二条路（纯市场，不跑脚本）**：插件市场 → Discover → **+** → 添加 GitHub 仓库 `willings-79/task-catchup` → 安装（ZCode 支持把 GitHub 仓库直接作为市场源）。
+
+主推四家（**WorkBuddy（wb）、ZCode、DSH、Codex**）的详细接法见下文各自小节；Claude Code、Cursor 等其他 agent 见「其他 agent」。
 
 **第 2 步 · 直接说人话**。装好后对 agent 说：
 
@@ -88,6 +101,22 @@ powershell -NoProfile -ExecutionPolicy Bypass -File New-CatchupTask.ps1 -Name "�
 powershell -NoProfile -ExecutionPolicy Bypass -File Enable-TaskCatchup.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File Enable-TaskCatchup.ps1 -Apply
 ```
+
+## 各家市场状态
+
+| Agent | 市场直达 | 现状 |
+|---|---|---|
+| ZCode | ✅ 插件市场 Discover → **+** → GitHub 仓库 `willings-79/task-catchup` | 官方支持 GitHub 市场源，仓库根即市场清单 |
+| Claude Code | ✅ `/plugin marketplace add willings-79/task-catchup` | `.claude-plugin/marketplace.json` 已就位 |
+| Codex | 技能目录 / `~/.codex/AGENTS.md` 规则 | 官方 Skills 已支持；其市场收录按官方流程另走 |
+| DSH | Skills 市场 | 收录按其《插件开发指南》流程申请；当前用 install.ps1 即插即用 |
+| WorkBuddy | Skills 市场 | 收录按其"创建自己的 Skills"流程申请；当前用 install.ps1 即插即用 |
+
+## 补跑时间窗（常见问题）
+
+- **默认补一天**：只补 **24 小时内**错过的任务（防止陈旧任务开机突袭），同一错过只执行一次（守卫自动记录状态）
+- **可以自定**：建任务时加 `-MaxDelayHours N`——N 小时内的错过才补（`-MaxDelayHours 48` = 两天内）；`-MaxDelayHours 0` = 不限时长、总是补最近一次
+- 对话里直接说「超过一天的就不补了」（默认即是）或「不限时间，能补就补」（用 0）
 
 ## 说明与边界
 
